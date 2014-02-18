@@ -1,0 +1,55 @@
+#! /bin/sh
+cmd=$1
+package_name=$2
+
+LIST_FILE=~/.go_pkg_list
+
+usage() {
+    echo "Usage:"    
+}
+
+list() {
+    cat $LIST_FILE
+}
+
+update() {
+    if ! grep -q $1 $LIST_FILE; then
+        echo "package:$1 doesn't exist"
+        exit 1
+    fi
+    case $1 in
+        all)
+            for pkg in `cat $LIST_FILE`; do
+                update $pkg
+            done
+            ;;
+        *)
+            echo "update package:$1"
+            go get -u $1
+    esac
+}
+
+get() {
+    if grep -q $package_name $LIST_FILE; then
+        update $package_name
+    else
+        echo "get $package_name"
+        go get $package_name
+        echo $package_name >> $LIST_FILE
+    fi
+}
+
+case $cmd in
+    get)
+        get
+        ;;
+    update)
+        update $2
+        ;;
+    list)
+        list
+        ;;
+    *)
+        usage
+        ;;
+esac
