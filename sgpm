@@ -13,7 +13,7 @@ list() {
 }
 
 update() {
-    if ! grep -q $1 $LIST_FILE; then
+    if ! grep -q $1 $LIST_FILE && [[ $1 != "all" ]]; then
         echo "package:$1 doesn't exist"
         exit 1
     fi
@@ -26,22 +26,22 @@ update() {
         *)
             echo "update package:$1"
             go get -u $1
+            ;;
     esac
 }
 
 get() {
-    if grep -q $package_name $LIST_FILE; then
-        update $package_name
+    if grep -q $1 $LIST_FILE; then
+        update $1
     else
-        echo "get $package_name"
-        go get $package_name
-        echo $package_name >> $LIST_FILE
+        echo "get $1"
+        go get $1 && echo $1 >> $LIST_FILE
     fi
 }
 
 case $cmd in
     get)
-        get
+        get $2
         ;;
     update)
         update $2
